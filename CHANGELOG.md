@@ -1,3 +1,110 @@
+# [1.11.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.10.0...v1.11.0) (2022-03-28)
+
+### Features
+
+- button pannel test concluded new icons added for next and prev buttons ([10a025e](https://github.com/Greenstand/treetracker-web-map-core/commit/10a025e54958378d63dcb3a729c976e3d4c50259))
+- removed all commented code and some unused code ([ba1626c](https://github.com/Greenstand/treetracker-web-map-core/commit/ba1626c0c6404375b3c768ee507e9487c2abf7e3))
+
+# [1.10.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.9.0...v1.10.0) (2022-03-18)
+
+### Bug Fixes
+
+- allow reassignment ([c29783d](https://github.com/Greenstand/treetracker-web-map-core/commit/c29783dc93afc4cfffbcd30585489044a0b29d0c))
+- textarea >>> ([ff47e3a](https://github.com/Greenstand/treetracker-web-map-core/commit/ff47e3a29d02996b5ba4cd6b538030fa006ef8bf))
+- typo in func name ([be86152](https://github.com/Greenstand/treetracker-web-map-core/commit/be86152f958b301b9421bceda3ef15c2ab9a014a))
+
+### Features
+
+- add function demo ([1218e4c](https://github.com/Greenstand/treetracker-web-map-core/commit/1218e4c829f5ba84da81c44c02497f288517a324))
+- expose addGeoJson function ([5c9067c](https://github.com/Greenstand/treetracker-web-map-core/commit/5c9067c6b7e0a039d10f82facf4181dac63a25e0))
+
+# [1.9.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.8.0...v1.9.0) (2022-03-14)
+
+### Features
+
+- added button hide and show feature based on tree points stored in cache ([c41683d](https://github.com/Greenstand/treetracker-web-map-core/commit/c41683d3e1d75d25a2a71c3e08e041cbdc5e0719))
+- merging conflict resolved ([3ef00be](https://github.com/Greenstand/treetracker-web-map-core/commit/3ef00bea688023952b2e06b9dcb5e53d9f2981a9))
+- new methods added to buttonPanel class to show and hide buttons ([a3d7190](https://github.com/Greenstand/treetracker-web-map-core/commit/a3d71903662e83ff946d2e9c93e3a42ac601d19c))
+- removed a css line as it had no effect ([be1c411](https://github.com/Greenstand/treetracker-web-map-core/commit/be1c411459f706154aeb9f8c6926cfb374c9581f))
+
+# [1.8.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.7.0...v1.8.0) (2022-03-07)
+
+### Features
+
+- add class to handle the display of nearest tree arrows ([87b92a2](https://github.com/Greenstand/treetracker-web-map-core/commit/87b92a206c65dce2e4b0557d7d7693193b3cc7c3))
+- add nearest tree arrows to core map ([85d9dbf](https://github.com/Greenstand/treetracker-web-map-core/commit/85d9dbf849539cdeee7c9656f58374b6363d4f3f))
+
+# [1.7.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.6.1...v1.7.0) (2022-02-12)
+
+### Features
+
+- hover effect added to buttons ([37b516c](https://github.com/Greenstand/treetracker-web-map-core/commit/37b516c5d7b69ae4b57208a735a90d188b249d65))
+
+## [1.6.1](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.6.0...v1.6.1) (2022-02-09)
+
+### Bug Fixes
+
+- css problem with next button ([b7bdbd5](https://github.com/Greenstand/treetracker-web-map-core/commit/b7bdbd542c3c504e6df5ae65b63d4024da950b27))
+
+# [1.6.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.5.0...v1.6.0) (2022-02-09)
+
+### Features
+
+- the next/prev button ([eb5d38c](https://github.com/Greenstand/treetracker-web-map-core/commit/eb5d38c36043e1ed10d337657e9711314aa640d6))
+
+# [1.5.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.4.2...v1.5.0) (2022-02-09)
+
+### Bug Fixes
+
+- add webpack install and pre-publish step back to npm-module-release script ([7b45798](https://github.com/Greenstand/treetracker-web-map-core/commit/7b457980b1365483d4e8f85efae5d9197dde7779))
+- move pre-publish step to build-release action ([58ae6ad](https://github.com/Greenstand/treetracker-web-map-core/commit/58ae6ad776b16399cfb56ac8352a5dd3d67c795d))
+
+### Features
+
+- added pre-publish webpack step to module release action ([71d7fdf](https://github.com/Greenstand/treetracker-web-map-core/commit/71d7fdf432d6adee563db5b724504b613726dbd0))
+
+## [1.4.2](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.4.1...v1.4.2) (2022-02-04)
+
+### Bug Fixes
+
+- test ([590482b](https://github.com/Greenstand/treetracker-web-map-core/commit/590482bbfaf7153044878bd688dab1b08618b9ec))
+
+## [1.4.1](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.4.0...v1.4.1) (2022-01-22)
+
+### Bug Fixes
+
+- add asset config for webpack to fix export issue of icons ([62deadb](https://github.com/Greenstand/treetracker-web-map-core/commit/62deadb325ab479dd4668d052d9809519dc12c28))
+
+# [1.4.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.3.1...v1.4.0) (2022-01-17)
+
+### Features
+
+- add option to dynamically switch the iconSuites and tileServerUrl ([ca93be8](https://github.com/Greenstand/treetracker-web-map-core/commit/ca93be86130f4cb45ffd7b8f5c69916c94915886))
+
+## [1.3.1](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.3.0...v1.3.1) (2022-01-13)
+
+### Bug Fixes
+
+- missing gen runtime" ([74ef59c](https://github.com/Greenstand/treetracker-web-map-core/commit/74ef59cadea4b5fc9b609e130e7874b3cc2a7b43))
+
+# [1.3.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.2.0...v1.3.0) (2022-01-13)
+
+### Features
+
+- deploy test ([de2c855](https://github.com/Greenstand/treetracker-web-map-core/commit/de2c855db81cb62f229bc77aa24bab9256d9e33f))
+
+# [1.2.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.1.0...v1.2.0) (2022-01-13)
+
+### Bug Fixes
+
+- install regenerator-runtime and import it to src/Map and src/Requestor ([2c8b7e7](https://github.com/Greenstand/treetracker-web-map-core/commit/2c8b7e7061860faad8f4088c2d3fa63685600696))
+- restore deleted css styles for old icons ([355c330](https://github.com/Greenstand/treetracker-web-map-core/commit/355c330d706bd1c651baf6e1f9e4d6df2df12292))
+
+### Features
+
+- set npm publishing to manual fixes [#56](https://github.com/Greenstand/treetracker-web-map-core/issues/56) ([#60](https://github.com/Greenstand/treetracker-web-map-core/issues/60)) ([932bed6](https://github.com/Greenstand/treetracker-web-map-core/commit/932bed6c2ef1742e5de83adc4474447a2566cab7))
+- update highlighted and selected tree icons ([080f0dc](https://github.com/Greenstand/treetracker-web-map-core/commit/080f0dc8818213ca488333459b83e246989a3bb7))
+
 # [1.1.0](https://github.com/Greenstand/treetracker-web-map-core/compare/v1.0.4...v1.1.0) (2022-01-11)
 
 ### Bug Fixes

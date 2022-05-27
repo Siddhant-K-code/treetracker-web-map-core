@@ -1,6 +1,7 @@
 /*
  * The main model for the treetracker model
  */
+import regeneratorRuntime from 'regenerator-runtime'
 import axios from 'axios'
 import expect from 'expect-runtime'
 import log from 'loglevel'
@@ -19,12 +20,21 @@ import EventEmitter from 'events'
 import Spin from './Spin'
 import Alert from './Alert'
 import TileLoadingMonitor from './TileLoadingMonitor'
+import ButtonPanel from './ButtonPanel'
+import NearestTreeArrows from './NearestTreeArrows'
 
 class MapError extends Error {}
 
 console.log('Greenstand web map core, version:')
 
 export default class Map {
+  // events
+  static REGISTERED_EVENTS = {
+    TREE_SELECTED: 'tree-selected',
+    TREE_UNSELECTED: 'tree-unselected',
+    MOVE_END: 'move-end',
+  }
+
   constructor(options) {
     // default
     const mapOptions = {
@@ -33,7 +43,7 @@ export default class Map {
         minZoom: 2,
         maxZoom: 20,
         initialCenter: [20, 0],
-        tileServerUrl: 'https://{s}.treetracker.org/tiles/new/',
+        tileServerUrl: 'https://{s}.treetracker.org/tiles/',
         tileServerSubdomains: ['dev-k8s'],
         apiServerUrl: 'https://dev-k8s.treetracker.org/webmap/',
         width: window.innerWidth,
@@ -120,6 +130,7 @@ export default class Map {
   on(eventName, handler) {
     //TODO check event name enum
     if (handler) {
+      log.info('register event:', eventName)
       this.events.on(eventName, handler)
     }
   }
@@ -138,9 +149,11 @@ export default class Map {
     divContainer.style.height = '100%'
     divContainer.style.position = 'relative'
     divContainer.innerHTML = `
+      <div id="greenstand-nearest-tree-arrow" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%"></div>
       <div id="greenstand-leaflet" style="position: relative;width: 100%;height: 100%;"></div>
       <div id="greenstand-map-spin" style="z-index: 999; position: absolute; width: 100%; top: 0px; left: 0px" ></div>
       <div id="greenstand-map-alert" style="z-index: 999; position: absolute; width: 100%; top: 0px; left: 0px" ></div>
+      <div id="greenstand-map-buttonPanel" style="z-index: 999; position: absolute; top: 0px; left:50%; transform: translateX(-50%)" ></div>
     `
     domElement.appendChild(divContainer)
     const mountTarget = document.getElementById('greenstand-leaflet')
@@ -154,6 +167,50 @@ export default class Map {
     this.map = this.L.map(mountTarget, mapOptions)
     this.map.setView(this.initialCenter, this.minZoom)
     this.map.attributionControl.setPrefix('')
+
+    // button prev next
+    {
+      // next tree buttons
+      const mountButtonPanelTarget = document.getElementById(
+        'greenstand-map-buttonPanel',
+      )
+      this.buttonPanel = new ButtonPanel(
+        () => this.goNextPoint(),
+        () => this.goPrevPoint(),
+      )
+      this.buttonPanel.mount(mountButtonPanelTarget)
+      this.on(Map.REGISTERED_EVENTS.TREE_SELECTED, () => {
+        const currentPoint = this.layerSelected.payload
+        const points = this.getPoints()
+        const index = points.reduce((a, c, i) => {
+          if (c.id === currentPoint.id) {
+            return i
+          }
+          return a
+        }, -1)
+        if (points.length <= 1) {
+          return null
+        }
+        this.buttonPanel.show()
+        if (index === 0) {
+          this.buttonPanel.hideLeftArrow()
+        } else if (index === points.length - 1) {
+          this.buttonPanel.hideRightArrow()
+        } else {
+          this.buttonPanel.showLeftArrow()
+          this.buttonPanel.showRightArrow()
+        }
+      })
+    }
+
+    // Nearest Tree Arrow
+    const mountNearestArrowTarget = document.getElementById(
+      'greenstand-nearest-tree-arrow',
+    )
+    this.nearestTreeArrow = new NearestTreeArrows(() =>
+      this.moveToNearestTree(),
+    )
+    this.nearestTreeArrow.mount(mountNearestArrowTarget)
 
     // load google map
     await this.loadGoogleSatellite()
@@ -190,7 +247,8 @@ export default class Map {
       // mount event
       this.map.on('moveend', (e) => {
         log.warn('move end', e)
-        this.events.emit('moveEnd')
+        this.checkArrow()
+        this.events.emit(Map.REGISTERED_EVENTS.MOVE_END)
       })
 
       if (this.filters.treeid) {
@@ -307,6 +365,17 @@ export default class Map {
     })
   }
 
+  async addGeoJson(source) {
+    let geo = source
+
+    if (typeof source === 'string') {
+      geo = (await axios.get(source)).data
+    }
+
+    const layer = window.L.geoJSON(geo).addTo(this.map)
+    return layer
+  }
+
   async gotoBounds(bounds) {
     const [southWestLng, southWestLat, northEastLng, northEastLat] =
       bounds.split(',')
@@ -338,13 +407,14 @@ export default class Map {
   }
 
   async loadTileServer() {
+    const { iconSuiteQueryString } = this.getIconSuiteParameters(this.iconSuite)
     // tile
     const filterParameters = this.getFilterParameters()
     const filterParametersString = filterParameters
-      ? `?${filterParameters}`
+      ? `&${filterParameters}`
       : ''
     this.layerTile = new this.L.tileLayer(
-      `${this.tileServerUrl}{z}/{x}/{y}.png${filterParametersString}`,
+      `${this.tileServerUrl}{z}/{x}/{y}.png?icon=${iconSuiteQueryString}${filterParametersString}`,
       {
         minZoom: this.minZoom,
         maxZoom: this.maxZoom,
@@ -379,7 +449,7 @@ export default class Map {
     this.layerTile.addTo(this.map)
 
     this.layerUtfGrid = new this.L.utfGrid(
-      `${this.tileServerUrl}{z}/{x}/{y}.grid.json${filterParametersString}`,
+      `${this.tileServerUrl}{z}/{x}/{y}.grid.json?icon=${iconSuiteQueryString}${filterParametersString}`,
       {
         minZoom: this.minZoom,
         maxZoom: this.maxZoom,
@@ -441,7 +511,7 @@ export default class Map {
       const isLoading = this.layerUtfGrid.isLoading()
       log.warn('utf layer is loading:', isLoading)
       if (isLoading) {
-        log.error('can not handle the grid utf check when loading, cancel!')
+        log.warn('can not handle the grid utf check when loading, cancel!')
         return false
       }
       const begin = Date.now()
@@ -567,16 +637,17 @@ export default class Map {
   }
 
   highlightMarker(data) {
+    const { iconSuiteClass } = this.getIconSuiteParameters(this.iconSuite)
     if (data.type === 'point') {
       this.layerHighlight = new this.L.marker([data.lat, data.lon], {
         icon: new this.L.DivIcon({
           className: 'greenstand-point-highlight',
           html: `
-                <div class="greenstand-point-highlight-box"  >
+                <div class="greenstand-point-highlight-box ${iconSuiteClass}"  >
                 <div></div>
                 </div>
               `,
-          iconSize: [32, 32],
+          iconSize: iconSuiteClass ? [64, 64] : [32, 32],
         }),
       })
     } else if (data.type === 'cluster') {
@@ -584,9 +655,9 @@ export default class Map {
         icon: new this.L.DivIcon({
           className: 'greenstand-cluster-highlight',
           html: `
-                <div class="greenstand-cluster-highlight-box ${
-                  data.count > 1000 ? '' : 'small'
-                }"  >
+                <div class="greenstand-cluster-highlight-box ${iconSuiteClass} ${
+            data.count > 1000 && !iconSuiteClass ? '' : 'small'
+          }">
                 <div>${Map.formatClusterText(data.count)}</div>
                 </div>
               `,
@@ -638,7 +709,8 @@ export default class Map {
   }
 
   selectMarker(data) {
-    log.info('change tree mark selected')
+    const { iconSuiteClass } = this.getIconSuiteParameters(this.iconSuite)
+    log.info('change tree mark selected with data:', data)
     // before set the selected tree icon, remote if any
     this.unselectMarker()
 
@@ -647,18 +719,25 @@ export default class Map {
       icon: new window.L.DivIcon({
         className: 'greenstand-point-selected',
         html: `
-            <div class="greenstand-point-selected-box"  >
+            <div class="greenstand-point-selected-box ${iconSuiteClass}"  >
             <div></div>
             </div>
           `,
-        iconSize: [32, 32],
+        iconSize: iconSuiteClass ? [64, 64] : [32, 32],
       }),
     })
     this.layerSelected.payload = data
     this.layerSelected.addTo(this.map)
+
+    this.events.emit(Map.REGISTERED_EVENTS.TREE_SELECTED, data)
   }
 
   unselectMarker() {
+    this.events.emit(
+      Map.REGISTERED_EVENTS.TREE_UNSELECTED,
+      this.layerSelected?.payload,
+    )
+
     if (this.map.hasLayer(this.layerSelected)) {
       this.map.removeLayer(this.layerSelected)
     } else {
@@ -757,6 +836,17 @@ export default class Map {
       } else {
         this.map.setView(view.center, view.zoomLevel, { animate: false })
       }
+    }
+  }
+
+  getIconSuiteParameters(iconSuite) {
+    switch (iconSuite) {
+      case 'ptk-s':
+        return { iconSuiteClass: 'green-s', iconSuiteQueryString: 'ptk-s' }
+      case 'ptk-b':
+        return { iconSuiteClass: 'green-b', iconSuiteQueryString: 'ptk-b' }
+      default:
+        return { iconSuiteClass: '', iconSuiteQueryString: 'o' }
     }
   }
 
@@ -1054,12 +1144,26 @@ export default class Map {
       const nearest = await this.getNearest()
       if (nearest) {
         const placement = this.calculatePlacement(nearest)
-        if (this.onFindNearestAt) {
-          this.onFindNearestAt(placement)
-        }
+        this.handleNearestArrowDisplay(placement)
       } else {
         log.warn("Can't get the nearest:", nearest)
+        this.handleNearestArrowDisplay()
       }
+    }
+  }
+
+  handleNearestArrowDisplay(placement) {
+    !placement || placement === 'in'
+      ? this.nearestTreeArrow.hideArrow()
+      : this.nearestTreeArrow.showArrow(placement)
+  }
+
+  async moveToNearestTree() {
+    const nearest = await this.getNearest()
+    if (nearest) {
+      this.goto(nearest)
+    } else {
+      log.warn('can not find nearest:', nearest)
     }
   }
 

@@ -18,6 +18,13 @@ npm run dev
 npm run cy
 ```
 
+## Debuging
+
+To open detailed log (default is WARN), set the loglevel as below:
+
+![image](https://user-images.githubusercontent.com/5744708/153115923-297b0f2f-c74b-4867-b9a0-7346a20f2ff1.png)
+
+
 ## Linting and Formatting
 
 **_Note: All of these actions will be automatically run when appropriate with lint-staged during the git pre-commit stage._**
@@ -69,4 +76,6 @@ import { Map } from 'treetracker-web-map-core'
 
 [npm-image]: https://img.shields.io/npm/v/treetracker-web-map-core.svg
 [npm-url]: https://npmjs.org/package/treetracker-web-map-core
+ 
+
 

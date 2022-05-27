@@ -49,12 +49,41 @@
         map.flyTo(parseInt(lat), parseInt(lon), parseInt(zoom));
         return false;
     }
+    function dosubmitChangeIcon() {
+      async function reload() {
+        const icon = document.getElementById("icons").value;
+        map.iconSuite = icon;
+        await map.loadInitialView();
+        map.rerender();
+      }
+      reload();
+      return false;
+    }
+
+    function dosubmitGeojson() {
+        (async () => {
+            let geo = document.getElementById('geojson').value;
+
+            try {
+                // attempt to parse as json obj otherwise pass as a URL
+                geo = JSON.parse(geo)
+            } finally {
+                await map.addGeoJson(geo);
+            }
+        })();
+        return false;
+    }
 </script>
 <style>
     .panel {
         border: 1px solid #ccc;
         padding: 10px;
         margin: 10px;
+    }
+
+    textarea {
+        display: block;
+        width: 25rem;
     }
 </style>
 
@@ -74,6 +103,24 @@
             lon <input id="lon" name="lon" type="input" value="" placeholder="longitude">
             zoomlevel <input id="zoom" name="zoom" type="input" value="" placeholder="zoom level">
             <input type="submit" name="flytoSubmit" value="Submit" />
+        </form>
+    </div>
+    <div class="panel">
+      <h5>Change Icon Suite</h5>
+      <form action="" onsubmit="return dosubmitChangeIcon();">
+        <select name="icons" id="icons">
+          <option value="orange">Orange</option>
+          <option value="ptk-b">Green-big</option>
+          <option value="ptk-s">Green-small</option>
+        </select>
+        <input type="submit" name="icons" value="Submit" />
+      </form>
+    </div>
+    <div class="panel">
+        <h5>Add custom GeoJSON</h5>
+        <form action="" onsubmit="return dosubmitGeojson();">
+            <textarea id="geojson" name="geojson" placeholder="Paste a geojson object or link to one"></textarea>
+            <input type="submit" value="Submit" />
         </form>
     </div>
 </body>
